@@ -1,6 +1,5 @@
 <?php
 
-
 return [
     'user_model' => \App\Models\User::class,
     'cluster' => \App\Filament\Clusters\Settings::class,
@@ -26,6 +25,6 @@ return [
     ],
     'default_flow' => [
         ['title' => 'Supervisor', 'step_order' => 1],
-        ['title' => 'Manager', 'step_order' => 2]
+        ['title' => 'Manager', 'step_order' => 2],
     ],
 ];
