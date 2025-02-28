@@ -1,15 +1,15 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace XBigDaddyx\Gatekeeper;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
-class SkeletonPlugin implements Plugin
+class GatekeeperPlugin implements Plugin
 {
     public function getId(): string
     {
-        return 'skeleton';
+        return 'gatekeeper';
     }
 
     public function register(Panel $panel): void
