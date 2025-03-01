@@ -20,7 +20,7 @@ return [
         'tenant_ownership_name' => 'currentTeam',
         'cluster' => \App\Filament\Clusters\Settings::class,
         'model' => \App\Models\User::class,
-        'scope_to_tenant' => false,
+        'scope_to_tenant' => true,
         'icon' => 'fluentui-people-queue-24',
         'should_register_on_navigation' => true,
         'label' => 'User Setting',

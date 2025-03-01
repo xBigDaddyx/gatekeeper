@@ -200,4 +200,42 @@ trait Approvable
             ]
         );
     }
+    /**
+     * Generate a signed URL for resending the approval request.
+     *
+     * @param \Illuminate\Contracts\Auth\Authenticatable $user
+     * @param int $ttl Minutes until the URL expires (default: 60 minutes)
+     * @return string
+     */
+    public function getResendApprovalUrl($tenant, $user, $ttl = 60)
+    {
+        return URL::temporarySignedRoute(
+            'gatekeeper.resend',
+            now()->addMinutes($ttl),
+            [
+                'approvable_type' => get_class($this),
+                'approvable_id' => $this->id,
+                'user_id' => $user->id,
+                'tenant_slug' => $tenant
+            ]
+        );
+    }
+
+    /**
+     * Resend the approval request to the next approvers.
+     *
+     * @param \Illuminate\Contracts\Auth\Authenticatable $user
+     * @return void
+     */
+    public function resendApprovalRequest($user)
+    {
+        $currentStep = $this->approvalFlow()->where('step_order', $this->current_step)->first();
+        if ($currentStep) {
+            $this->notifyNextApprovers($currentStep);
+            event(new ApprovalRequested($this));
+            Log::info("Approval request resent for {$this->id} at step {$this->current_step} by user #{$user->id}");
+        } else {
+            Log::warning("No current step found to resend approval for {$this->id}");
+        }
+    }
 }

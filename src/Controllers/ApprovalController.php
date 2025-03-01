@@ -17,13 +17,12 @@ class ApprovalController extends Controller
 
         if (!class_exists($approvable_type) || !in_array(\XBigDaddyx\Gatekeeper\Traits\Approvable::class, class_uses_recursive($approvable_type))) {
 
-            return response()->json(['error' => 'Invalid resource type'], 404);
+            return view('gatekeeper::errors.invalid', ['message' => 'Invalid approvable type']);
         }
 
         $tenant = \App\Models\Tenant::where('slug', $tenant_slug)->first();
         if (!$tenant) {
-
-            return response()->json(['error' => 'Tenant not found'], 404);
+            return view('gatekeeper::errors.not-found', ['message' => 'Tenant not found.']);
         }
 
         $result = $tenant->run(function () use ($approvable_type, $approvable_id, $user_id, $request) {
@@ -33,7 +32,7 @@ class ApprovalController extends Controller
             $user = $userModel::findOrFail($user_id);
 
             if (!$approvable->canBeApprovedBy($user)) {
-                return response()->json(['error' => 'You are not authorized to approve this resource'], 403);
+                return view('gatekeeper::errors.unauthorized', ['message' => 'You are not authorized to approve this resource.']);
             }
 
             $approvable->approve($user, $request->input('comment'), false);
@@ -56,16 +55,19 @@ class ApprovalController extends Controller
     public function reject(Request $request, $approvable_type, $approvable_id, $user_id, $tenant_slug)
     {
         if (!class_exists($approvable_type) || !in_array(\XBigDaddyx\Gatekeeper\Traits\Approvable::class, class_uses_recursive($approvable_type))) {
-            return response()->json(['error' => 'Invalid resource type'], 404);
+            return view('gatekeeper::errors.invalid', ['message' => 'Invalid approvable type']);
         }
         $tenant = \App\Models\Tenant::where('slug', $tenant_slug)->first();
+        if (!$tenant) {
+            return view('gatekeeper::errors.not-found', ['message' => 'Tenant not found.']);
+        }
         $result = $tenant->run(function ($tenant) use ($approvable_type, $approvable_id, $user_id, $request) {
             $approvable = $approvable_type::findOrFail($approvable_id);
             $userModel = config('gatekeeper.user_model', \App\Models\User::class);
             $user = $userModel::findOrFail($user_id);
 
             if (!$approvable->canBeApprovedBy($user)) {
-                return response()->json(['error' => 'You are not authorized to reject this resource'], 403);
+                return view('gatekeeper::errors.unauthorized', ['message' => 'You are not authorized to reject this resource.']);
             }
 
             $approvable->reject($user, $request->input('comment'), false);
