@@ -2,9 +2,9 @@
 
 namespace XBigDaddyx\Gatekeeper\Filament\Resources\UserResource\Pages;
 
-use XBigDaddyx\Gatekeeper\Filament\Resources\UserResource;
 use Filament\Resources\Pages\Page;
 use JaOcero\ActivityTimeline\Pages\ActivityTimelinePage;
+use XBigDaddyx\Gatekeeper\Filament\Resources\UserResource;
 
 class ViewUserActivities extends ActivityTimelinePage
 {
@@ -33,7 +33,7 @@ class ViewUserActivities extends ActivityTimelinePage
                 'placeholder' => 'No title is set', // this will show when there is no title
                 'allow_html' => true, // set true to allow html in the title
 
-                /**
+            /**
              * You are free to adjust the state before displaying it on your page.
              * Take note that the state returns these data below:
              *      [
@@ -58,7 +58,7 @@ class ViewUserActivities extends ActivityTimelinePage
                 'placeholder' => 'No description is set', // this will show when there is no description
                 'allow_html' => true, // set true to allow html in the description
 
-                /**
+            /**
              * You are free to adjust the state before displaying it on your page.
              * Take note that the state returns these data below:
              *      [
@@ -85,7 +85,7 @@ class ViewUserActivities extends ActivityTimelinePage
                 'placeholder' => 'No date is set', // this will show when there is no date
             ],
             'activity_icon' => [
-                'icon' => fn(?string $state): ?string => match ($state) {
+                'icon' => fn (?string $state): ?string => match ($state) {
                     /**
                      * 'event_name' => 'heroicon-o-calendar',
                      * ... and more
@@ -93,7 +93,7 @@ class ViewUserActivities extends ActivityTimelinePage
                     'updated' => 'fluentui-document-edit-16-o',
                     default => 'heroicon-o-calendar'
                 },
-                'color' => fn(?string $state): ?string => match ($state) {
+                'color' => fn (?string $state): ?string => match ($state) {
                     /**
                      * 'event_name' => 'primary',
                      * ... and more

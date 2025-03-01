@@ -2,9 +2,9 @@
 
 namespace XBigDaddyx\Gatekeeper\Filament\Resources\UserResource\Pages;
 
-use XBigDaddyx\Gatekeeper\Filament\Resources\UserResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use XBigDaddyx\Gatekeeper\Filament\Resources\UserResource;
 
 class ViewUser extends ViewRecord
 {

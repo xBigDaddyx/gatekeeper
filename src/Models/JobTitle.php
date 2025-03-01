@@ -9,8 +9,9 @@ class JobTitle extends Model
     public function __construct()
     {
         parent::__construct();
-        $this->table = config("gatekeeper.tables.job_titles");
+        $this->table = config('gatekeeper.tables.job_titles');
     }
+
     protected $fillable = ['title'];
 
     public function users()

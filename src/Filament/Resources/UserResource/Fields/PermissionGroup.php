@@ -55,7 +55,7 @@ class PermissionGroup extends CheckboxList
                 // https://github.com/laravel-filament/filament/issues/1111
                 $relatedModels
                     ->pluck($relationship->getRelatedKeyName())
-                    ->map(static fn($key): string => (string) $key)
+                    ->map(static fn ($key): string => (string) $key)
                     ->toArray(),
             );
         });
@@ -65,10 +65,10 @@ class PermissionGroup extends CheckboxList
         });
 
         $this->options(
-            static fn() => Permission::query()
+            static fn () => Permission::query()
                 ->where('guard_name', 'web')
                 ->pluck('name', 'id')
-                ->map(static fn(string $name) => __($name))
+                ->map(static fn (string $name) => __($name))
                 ->all(),
         );
 

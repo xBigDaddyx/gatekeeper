@@ -5,12 +5,10 @@ namespace Xbigdaddyx\Gatekeeper\Filament\Resources;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Xbigdaddyx\Gatekeeper\Models\JobTitle;
 use Xbigdaddyx\Gatekeeper\Filament\Resources\JobTitleResource\Pages;
-
+use Xbigdaddyx\Gatekeeper\Models\JobTitle;
 
 class JobTitleResource extends Resource
 {
@@ -21,7 +19,7 @@ class JobTitleResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return  config('gatekeeper.job_title.icon');
+        return config('gatekeeper.job_title.icon');
     }
 
     public static function shouldRegisterNavigation(): bool
@@ -46,7 +44,7 @@ class JobTitleResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return  config('gatekeeper.job_title.sort');
+        return config('gatekeeper.job_title.sort');
     }
 
     public static function getPluralLabel(): string

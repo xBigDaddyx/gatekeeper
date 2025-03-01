@@ -9,8 +9,9 @@ class ApprovalFlow extends Model
     public function __construct()
     {
         parent::__construct();
-        $this->table = config("gatekeeper.tables.approval_flows");
+        $this->table = config('gatekeeper.tables.approval_flows');
     }
+
     protected $fillable = ['approvable_type', 'job_title_id', 'role', 'step_order', 'is_parallel', 'condition'];
 
     protected $casts = [

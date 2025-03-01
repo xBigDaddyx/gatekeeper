@@ -28,9 +28,10 @@ trait Approvable
     public function canBeApprovedBy($user)
     {
         $currentStep = $this->approvalFlow()->where('step_order', $this->current_step)->first();
-        if (!$currentStep || $this->management_approval_status->value !== config('gatekeeper.statuses.pending', 'pending')) {
+        if (! $currentStep || $this->management_approval_status->value !== config('gatekeeper.statuses.pending', 'pending')) {
             return false;
         }
+
         return ($currentStep->job_title_id && $user->job_title_id === $currentStep->job_title_id) ||
             ($currentStep->role && $user->hasRole($currentStep->role));
     }
@@ -39,6 +40,7 @@ trait Approvable
     {
         if ($queue) {
             ProcessApproval::dispatch($this, $user, 'approve', $comment);
+
             return;
         }
 
@@ -58,6 +60,7 @@ trait Approvable
                     ->count();
                 if ($currentApprovals < count($requiredApprovals)) {
                     $this->notifyNextApprovers($currentStep);
+
                     return;
                 }
             }
@@ -79,6 +82,7 @@ trait Approvable
     {
         if ($queue) {
             ProcessApproval::dispatch($this, $user, 'reject', $comment);
+
             return;
         }
 
@@ -99,27 +103,28 @@ trait Approvable
         $steps = $this->approvalFlow()->where('step_order', '>', $this->current_step)->orderBy('step_order')->get();
 
         foreach ($steps as $step) {
-            $conditionResult = !$step->condition || $this->evaluateCondition($step->condition);
+            $conditionResult = ! $step->condition || $this->evaluateCondition($step->condition);
 
             if ($conditionResult) {
                 return $step;
             }
         }
+
         return null;
     }
 
     protected function evaluateCondition($condition)
     {
         // Handle cases where $condition might be a string (e.g., JSON)
-        if (!is_array($condition)) {
+        if (! is_array($condition)) {
             $condition = json_decode($condition, true);
-            if (!is_array($condition)) {
+            if (! is_array($condition)) {
                 return true; // If not a valid array, skip condition
             }
         }
 
         // Ensure all required keys exist
-        if (!isset($condition['field']) || !isset($condition['operator']) || !isset($condition['value'])) {
+        if (! isset($condition['field']) || ! isset($condition['operator']) || ! isset($condition['value'])) {
             return true; // Skip if condition is incomplete
         }
 
@@ -129,11 +134,11 @@ trait Approvable
 
         switch ($operator) {
             case '<':
-                return $this->$field < $value;
+                return $value > $this->$field;
             case '>':
-                return $this->$field > $value;
+                return $value < $this->$field;
             case '=':
-                return $this->$field == $value;
+                return $value == $this->$field;
             default:
                 return true;
         }
@@ -142,6 +147,7 @@ trait Approvable
     protected function getRequiredParallelApprovals($step)
     {
         $userModel = config('gatekeeper.user_model', \App\Models\User::class);
+
         return $step->job_title_id
             ? $userModel::where('job_title_id', $step->job_title_id)->pluck('id')->toArray()
             : $userModel::role($step->role)->pluck('id')->toArray();
@@ -159,11 +165,12 @@ trait Approvable
             $user->notify(new ApprovalRequestedNotification(tenant()->slug, $this, $approveUrl, $rejectUrl, $step));
         });
     }
+
     /**
      * Generate a signed URL for approving this resource.
      *
-     * @param \Illuminate\Contracts\Auth\Authenticatable $user
-     * @param int $ttl Minutes until the URL expires (default: 60 minutes)
+     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
+     * @param  int  $ttl  Minutes until the URL expires (default: 60 minutes)
      * @return string
      */
     public function getApprovalUrl($tenant, $user, $ttl = 60)
@@ -175,7 +182,7 @@ trait Approvable
                 'approvable_type' => get_class($this), // e.g., App\Models\Accuracy\PackingList
                 'approvable_id' => $this->id,
                 'user_id' => $user->id,
-                'tenant_slug' => $tenant
+                'tenant_slug' => $tenant,
             ]
         );
     }
@@ -183,8 +190,8 @@ trait Approvable
     /**
      * Generate a signed URL for rejecting this resource.
      *
-     * @param \Illuminate\Contracts\Auth\Authenticatable $user
-     * @param int $ttl Minutes until the URL expires (default: 60 minutes)
+     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
+     * @param  int  $ttl  Minutes until the URL expires (default: 60 minutes)
      * @return string
      */
     public function getRejectionUrl($tenant, $user, $ttl = 60)
@@ -196,15 +203,16 @@ trait Approvable
                 'approvable_type' => get_class($this),
                 'approvable_id' => $this->id,
                 'user_id' => $user->id,
-                'tenant_slug' => $tenant
+                'tenant_slug' => $tenant,
             ]
         );
     }
+
     /**
      * Generate a signed URL for resending the approval request.
      *
-     * @param \Illuminate\Contracts\Auth\Authenticatable $user
-     * @param int $ttl Minutes until the URL expires (default: 60 minutes)
+     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
+     * @param  int  $ttl  Minutes until the URL expires (default: 60 minutes)
      * @return string
      */
     public function getResendApprovalUrl($tenant, $user, $ttl = 60)
@@ -216,7 +224,7 @@ trait Approvable
                 'approvable_type' => get_class($this),
                 'approvable_id' => $this->id,
                 'user_id' => $user->id,
-                'tenant_slug' => $tenant
+                'tenant_slug' => $tenant,
             ]
         );
     }
@@ -224,7 +232,7 @@ trait Approvable
     /**
      * Resend the approval request to the next approvers.
      *
-     * @param \Illuminate\Contracts\Auth\Authenticatable $user
+     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
      * @return void
      */
     public function resendApprovalRequest($user)

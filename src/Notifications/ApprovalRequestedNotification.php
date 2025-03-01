@@ -8,9 +8,13 @@ use Illuminate\Notifications\Notification;
 class ApprovalRequestedNotification extends Notification
 {
     protected $approvable;
+
     protected $approveUrl;
+
     protected $rejectUrl;
+
     protected $step;
+
     protected $tenant_slug;
 
     public function __construct($tenant_slug, $approvable, $approveUrl, $rejectUrl, $step = null)

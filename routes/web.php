@@ -5,7 +5,7 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use XBigDaddyx\Gatekeeper\Controllers\ApprovalController;
 
-if ((bool)config('gatekeeper.use_multi_db_tenant')) {
+if ((bool) config('gatekeeper.use_multi_db_tenant')) {
     Route::middleware([
         'signed',
         InitializeTenancyByDomain::class,

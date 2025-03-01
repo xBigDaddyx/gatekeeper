@@ -2,20 +2,16 @@
 
 namespace XBigDaddyx\Gatekeeper\Filament\Resources;
 
-use AbdelhamidErrahmouni\FilamentMonacoEditor\Facades\MonacoEditor;
-use App\Filament\Clusters\Settings;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Xbigdaddyx\Gatekeeper\Filament\Resources\ApprovalFlowResource\Pages;
 use Xbigdaddyx\Gatekeeper\Models\ApprovalFlow;
-
 
 class ApprovalFlowResource extends Resource
 {
@@ -26,7 +22,7 @@ class ApprovalFlowResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return  config('gatekeeper.approval_flow.icon');
+        return config('gatekeeper.approval_flow.icon');
     }
 
     public static function shouldRegisterNavigation(): bool
@@ -51,7 +47,7 @@ class ApprovalFlowResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return  config('gatekeeper.approval_flow.sort');
+        return config('gatekeeper.approval_flow.sort');
     }
 
     public static function getPluralLabel(): string

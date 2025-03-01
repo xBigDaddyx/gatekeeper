@@ -2,13 +2,13 @@
 
 namespace Xbigdaddyx\Gatekeeper\Filament\Resources\UserResource\Pages;
 
-use Xbigdaddyx\Gatekeeper\Filament\Resources\UserResource;
 use App\Models\Entity;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Xbigdaddyx\Gatekeeper\Filament\Resources\UserResource;
 
 class ManageUserRoles extends ManageRelatedRecords
 {

@@ -9,8 +9,9 @@ class Approval extends Model
     public function __construct()
     {
         parent::__construct();
-        $this->table = config("gatekeeper.tables.approvals");
+        $this->table = config('gatekeeper.tables.approvals');
     }
+
     protected $fillable = ['approvable_id', 'approvable_type', 'user_id', 'status', 'comment', 'action_at'];
 
     public function approvable()

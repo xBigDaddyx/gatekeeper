@@ -2,9 +2,9 @@
 
 namespace Xbigdaddyx\Gatekeeper\Filament\Resources\ApprovalFlowResource\Pages;
 
-use Xbigdaddyx\Gatekeeper\Filament\Resources\ApprovalFlowResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Xbigdaddyx\Gatekeeper\Filament\Resources\ApprovalFlowResource;
 
 class EditApprovalFlow extends EditRecord
 {

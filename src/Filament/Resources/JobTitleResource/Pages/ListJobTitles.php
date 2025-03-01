@@ -2,9 +2,9 @@
 
 namespace Xbigdaddyx\Gatekeeper\Filament\Resources\JobTitleResource\Pages;
 
-use Xbigdaddyx\Gatekeeper\Filament\Resources\JobTitleResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Xbigdaddyx\Gatekeeper\Filament\Resources\JobTitleResource;
 
 class ListJobTitles extends ListRecords
 {

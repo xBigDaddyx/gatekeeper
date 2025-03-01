@@ -2,8 +2,8 @@
 
 namespace XBigDaddyx\Gatekeeper\Filament\Resources\UserResource\Pages;
 
-use XBigDaddyx\Gatekeeper\Filament\Resources\UserResource;
 use Filament\Resources\Pages\CreateRecord;
+use XBigDaddyx\Gatekeeper\Filament\Resources\UserResource;
 
 class CreateUser extends CreateRecord
 {

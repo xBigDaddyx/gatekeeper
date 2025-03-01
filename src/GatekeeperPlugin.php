@@ -21,7 +21,7 @@ class GatekeeperPlugin implements Plugin
             ->resources([
                 ApprovalFlowResource::class,
                 JobTitleResource::class,
-                UserResource::class
+                UserResource::class,
             ])
             ->pages([
                 //

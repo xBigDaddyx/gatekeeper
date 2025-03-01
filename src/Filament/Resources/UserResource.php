@@ -2,10 +2,7 @@
 
 namespace XBigDaddyx\Gatekeeper\Filament\Resources;
 
-use XBigDaddyx\Gatekeeper\Filament\Resources\UserResource\Pages;
-use XBigDaddyx\Gatekeeper\Filament\Resources\UserResource\RelationManagers;
 use App\Models\Role;
-use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\Page;
@@ -14,6 +11,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use XBigDaddyx\Gatekeeper\Filament\Resources\UserResource\Pages;
+use XBigDaddyx\Gatekeeper\Filament\Resources\UserResource\RelationManagers;
 
 class UserResource extends Resource
 {
@@ -24,7 +23,7 @@ class UserResource extends Resource
 
     public static function getNavigationIcon(): ?string
     {
-        return  config('gatekeeper.user.icon');
+        return config('gatekeeper.user.icon');
     }
 
     public static function shouldRegisterNavigation(): bool
@@ -49,7 +48,7 @@ class UserResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return  config('gatekeeper.user.sort');
+        return config('gatekeeper.user.sort');
     }
 
     public static function getPluralLabel(): string
@@ -61,6 +60,7 @@ class UserResource extends Resource
     {
         return config('gatekeeper.user.cluster', null);
     }
+
     public static function getTenantOwnershipRelationshipName(): string
     {
         return config('gatekeeper.user.tenant_ownership_name');
@@ -126,7 +126,7 @@ class UserResource extends Resource
                     ->searchable()
                     ->label('Email'),
                 Tables\Columns\IconColumn::make('email_verified_at')
-                    ->state(fn($record) => (bool) $record->email_verified_at)
+                    ->state(fn ($record) => (bool) $record->email_verified_at)
                     ->tooltip(function (Model $record) {
                         if ((bool) $record->email_verified_at) {
                             return __('tooltip.verified');
@@ -147,17 +147,17 @@ class UserResource extends Resource
             ->filters([
                 Tables\Filters\Filter::make('verified')
                     ->label('Verified')
-                    ->query(fn(Builder $query): Builder => $query->whereNotNull('email_verified_at')),
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('email_verified_at')),
                 Tables\Filters\Filter::make('unverified')
                     ->label('Unverified')
-                    ->query(fn(Builder $query): Builder => $query->whereNull('email_verified_at')),
+                    ->query(fn (Builder $query): Builder => $query->whereNull('email_verified_at')),
             ])
             ->actions([
                 Tables\Actions\Action::make('view_activities')
                     ->label('Activities')
                     ->icon('heroicon-m-bolt')
                     ->color('purple')
-                    ->url(fn($record) => UserResource::getUrl('activities', ['record' => $record])),
+                    ->url(fn ($record) => UserResource::getUrl('activities', ['record' => $record])),
                 Tables\Actions\Action::make('assignRole')
                     ->form([
                         Forms\Components\Select::make('role')
