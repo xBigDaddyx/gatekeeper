@@ -1,78 +1,30 @@
-# This is my package gatekeeper
+# Laravel Approval Workflow
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/xbigdaddyx/gatekeeper.svg?style=flat-square)](https://packagist.org/packages/xbigdaddyx/gatekeeper)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/xbigdaddyx/gatekeeper/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/xbigdaddyx/gatekeeper/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/xbigdaddyx/gatekeeper/fix-php-code-styling.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/xbigdaddyx/gatekeeper/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/xbigdaddyx/gatekeeper.svg?style=flat-square)](https://packagist.org/packages/xbigdaddyx/gatekeeper)
+**A dynamic, multi-level approval system for Laravel with Filament integration.**
 
+The `laravel-approval-workflow` package provides a flexible and powerful solution for implementing approval workflows in Laravel applications. It supports job title- and role-based approvals, parallel and conditional steps, queueable actions, audit trails, API endpoints, and notifications, all seamlessly integrated with Filament for an intuitive admin interface.
 
+## Features
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+- **Multi-Level Approvals**: Define sequential approval steps based on job titles or roles.
+- **Role-Based Approvals**: Integrates with `spatie/laravel-permission` for role-based workflows.
+- **Parallel Approvals**: Require multiple approvers at the same step.
+- **Conditional Steps**: Skip or include steps based on model attributes (e.g., amount < 1000).
+- **Queueable Actions**: Process approvals asynchronously for performance.
+- **Audit Trail**: Track all approval actions with timestamps and comments.
+- **API Endpoints**: Manage approvals programmatically via RESTful API.
+- **Notifications**: Automatically notify approvers via email or other channels.
+- **Filament Integration**: Manage workflows through a user-friendly admin panel.
+
+## Requirements
+
+- PHP 8.2+
+- Laravel 11.0+
+- Filament 3.2+
+- Spatie Laravel Permission 6.0+ (for role-based approvals)
 
 ## Installation
 
-You can install the package via composer:
-
-```bash
-composer require xbigdaddyx/gatekeeper
-```
-
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="gatekeeper-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag="gatekeeper-config"
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="gatekeeper-views"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
-```
-
-## Usage
-
-```php
-$gatekeeper = new XBigDaddyx\Gatekeeper();
-echo $gatekeeper->echoPhrase('Hello, XBigDaddyx!');
-```
-
-## Testing
-
-```bash
-composer test
-```
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
-
-## Credits
-
-- [xBigDaddyx](https://github.com/xBigDaddyx)
-- [All Contributors](../../contributors)
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+1. **Install the Package via Composer:**
+   ```bash
+   composer require yourname/laravel-approval-workflow:^1.0

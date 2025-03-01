@@ -4,6 +4,9 @@ namespace XBigDaddyx\Gatekeeper;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use XBigDaddyx\Gatekeeper\Filament\Resources\ApprovalFlowResource;
+use XBigDaddyx\Gatekeeper\Filament\Resources\JobTitleResource;
+use XBigDaddyx\Gatekeeper\Filament\Resources\UserResource;
 
 class GatekeeperPlugin implements Plugin
 {
@@ -14,7 +17,15 @@ class GatekeeperPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        //
+        $panel
+            ->resources([
+                ApprovalFlowResource::class,
+                JobTitleResource::class,
+                UserResource::class
+            ])
+            ->pages([
+                //
+            ]);
     }
 
     public function boot(Panel $panel): void

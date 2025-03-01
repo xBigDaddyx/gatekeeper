@@ -40,7 +40,9 @@ class GatekeeperServiceProvider extends PackageServiceProvider
             });
 
         $configFileName = $package->shortName();
-
+        if (file_exists($package->basePath("/../routes/web.php"))) {
+            $package->hasRoutes("web");
+        }
         if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
             $package->hasConfigFile();
         }
@@ -101,8 +103,8 @@ class GatekeeperServiceProvider extends PackageServiceProvider
     {
         return [
             // AlpineComponent::make('gatekeeper', __DIR__ . '/../resources/dist/components/gatekeeper.js'),
-            Css::make('gatekeeper-styles', __DIR__ . '/../resources/dist/gatekeeper.css'),
-            Js::make('gatekeeper-scripts', __DIR__ . '/../resources/dist/gatekeeper.js'),
+            // Css::make('gatekeeper-styles', __DIR__ . '/../resources/dist/gatekeeper.css'),
+            // Js::make('gatekeeper-scripts', __DIR__ . '/../resources/dist/gatekeeper.js'),
         ];
     }
 
@@ -112,7 +114,7 @@ class GatekeeperServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            GatekeeperCommand::class,
+            // GatekeeperCommand::class,
         ];
     }
 
@@ -146,7 +148,10 @@ class GatekeeperServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_gatekeeper_table',
+            '2023_01_01_000001_create_job_titles_table',
+            '2023_01_01_000002_create_approval_flows_table',
+            '2023_01_01_000003_create_approvals_table',
+            '2023_01_01_000004_add_jobtitle_id_columns_to_users_table'
         ];
     }
 }

@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create(config('teresa-gatekeeper.tables.approvals', 'approvals'), function (Blueprint $table) {
+        Schema::create(config('gatekeeper.tables.approvals', 'approvals'), function (Blueprint $table) {
             $table->id();
-            $table->morphs('approvable');
+            $table->uuidMorphs('approvable');
             $table->foreignId('user_id')->constrained();
             $table->string('status');
             $table->text('comment')->nullable();
@@ -21,6 +21,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists(config('teresa-gatekeeper.tables.approvals', 'approvals'));
+        Schema::dropIfExists(config('gatekeeper.tables.approvals', 'approvals'));
     }
 };

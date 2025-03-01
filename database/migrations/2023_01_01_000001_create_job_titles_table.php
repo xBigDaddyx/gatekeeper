@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create(config('teresa-gatekeeper.tables.job_titles', 'job_titles'), function (Blueprint $table) {
+        Schema::create(config('gatekeeper.tables.job_titles', 'job_titles'), function (Blueprint $table) {
             $table->id();
             $table->string('title')->unique();
             $table->timestamps();
@@ -17,6 +17,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists(config('teresa-gatekeeper.tables.job_titles', 'job_titles'));
+        Schema::dropIfExists(config('gatekeeper.tables.job_titles', 'job_titles'));
     }
 };
