@@ -23,7 +23,7 @@ class ApprovalRequestedNotification extends Notification
         $this->approveUrl = $approveUrl;
         $this->rejectUrl = $rejectUrl;
         $this->step = $step;
-        $this->tenant = $tenant_slug;
+        $this->$tenant_slug = $tenant_slug;
     }
 
     public function via($notifiable)
@@ -34,7 +34,7 @@ class ApprovalRequestedNotification extends Notification
     public function toMail($notifiable)
     {
         $resourceName = class_basename($this->approvable);
-        $stepInfo = $this->step ? "Step {$this->step->step_order}: " . ($this->step->job_title_id ? 'Packing Supervisor' : $this->step->role) : 'Final Approval';
+        $stepInfo = $this->step ? "Step {$this->step->step_order}: ".($this->step->job_title_id ? 'Packing Supervisor' : $this->step->role) : 'Final Approval';
 
         // Compute validated items from CartonBox records
         $validatedItems = $this->approvable->cartonBoxes()
@@ -47,6 +47,7 @@ class ApprovalRequestedNotification extends Notification
 
         return (new MailMessage)
             ->subject("Approval Required: {$resourceName} #{$this->approvable->id}")
+            ->cc('faisal.yusuf@hoplun.com')
             ->view('gatekeeper::mail.gatekeeper.approval_requested', [
                 'po' => $this->approvable->purchase_order_number,
                 'po_quantity' => $this->approvable->purchase_order_quantity,
