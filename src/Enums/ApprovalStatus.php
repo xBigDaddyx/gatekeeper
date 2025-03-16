@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums;
+namespace XBigDaddyx\Gatekeeper\Enums;
 
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
