@@ -15,193 +15,198 @@ use XBigDaddyx\Gatekeeper\Notifications\ApprovalRequestedNotification;
 
 trait Approvable
 {
-    /** Get the column name for approval status */
-    public function getApprovalStatusColumn(): string
-    {
-        return config('gatekeeper.approval_status_column', 'approval_status');
-    }
+  /** Get the column name for approval status */
+  public function getApprovalStatusColumn(): string
+  {
+    return config('gatekeeper.approval_status_column', 'approval_status');
+  }
 
-    public function getApprovalStatusAttribute()
-    {
-        $status = $this->{$this->getApprovalStatusColumn()};
+  public function getApprovalStatusAttribute()
+  {
+    $status = $this->{$this->getApprovalStatusColumn()};
+    return $status instanceof ApprovalStatus ? $status : ApprovalStatus::tryFrom($status);
+  }
 
-        if ($status instanceof ApprovalStatus) {
-            return $status;
-        }
+  /** Set the approval status */
+  public function setApprovalStatus(ApprovalStatus $status): void
+  {
+    $this->{$this->getApprovalStatusColumn()} = $status->value;
+    $this->save();
+  }
 
-        return ApprovalStatus::tryFrom($status);
-    }
+  /** Approval status checkers */
+  public function isPending(): bool
+  {
+    return $this->getApprovalStatusAttribute() === ApprovalStatus::PENDING;
+  }
 
-    /** Set the approval status */
-    public function setApprovalStatus(ApprovalStatus $status)
-    {
-        $this->{$this->getApprovalStatusColumn()} = $status->value;
-        $this->save();
-    }
+  public function approvalHistory()
+  {
+    return $this->approvals()->with('user')->orderBy('created_at', 'desc');
+  }
 
-    /** Approval status checkers */
-    public function isPending(): bool
-    {
-        return $this->getApprovalStatusAttribute() === ApprovalStatus::PENDING;
-    }
+  public function pendingApprovals()
+  {
+    return $this->approvals()->with('user')->where('status', ApprovalStatus::PENDING->value)->orderBy('created_at', 'desc');
+  }
 
-    public function approvalHistory()
-    {
-        return $this->approvals()->orderBy('created_at', 'desc');
-    }
+  public function isApproved(): bool
+  {
+    return $this->getApprovalStatusAttribute() === ApprovalStatus::APPROVED;
+  }
 
-    public function pendingApprovals()
-    {
-        return $this->approvals()->where('status', ApprovalStatus::PENDING);
-    }
+  public function isRejected(): bool
+  {
+    return $this->getApprovalStatusAttribute() === ApprovalStatus::REJECTED;
+  }
 
-    public function isApproved(): bool
-    {
-        return $this->getApprovalStatusAttribute() === ApprovalStatus::APPROVED;
-    }
+  /** Relationships */
+  public function approvals()
+  {
+    return $this->morphMany(Approval::class, 'approvable');
+  }
 
-    public function isRejected(): bool
-    {
-        return $this->getApprovalStatusAttribute() === ApprovalStatus::REJECTED;
-    }
+  public function approvalFlow()
+  {
+    return ApprovalFlow::where('approvable_type', self::class);
+  }
 
-    /** Relationships */
-    public function approvals()
-    {
-        return $this->morphMany(Approval::class, 'approvable');
-    }
-
-    public function approvalFlow()
-    {
-        return ApprovalFlow::where('approvable_type', self::class);
-    }
-
-    /** Check if user can approve */
-    public function canBeApprovedBy($user): bool
-    {
-        $currentStep = $this->approvalFlow()->where('step_order', $this->current_step)->first();
-
-        return $currentStep && $this->isPending() && (
-            ($currentStep->job_title_id && $user->job_title_id === $currentStep->job_title_id) ||
+  /** Check if user can approve */
+  public function canBeApprovedBy($user): bool
+  {
+    $currentStep = $this->approvalFlow()->where('step_order', $this->current_step)->first();
+    return $currentStep && $this->isPending() && (
+      ($currentStep->job_title_id && $user->job_title_id === $currentStep->job_title_id) ||
       ($currentStep->role && $user->hasRole($currentStep->role))
-        );
+    );
+  }
+
+  /** Approve the request */
+  public function approve($user, $comment = null, $queue = true): void
+  {
+    if ($queue) {
+      ProcessApproval::dispatch($this, $user, 'approve', $comment);
+      return;
     }
 
-    /** Approve the request */
-    public function approve($user, $comment = null, $queue = true)
-    {
-        if ($queue) {
-            return ProcessApproval::dispatch($this, $user, 'approve', $comment);
-        }
+    DB::transaction(function () use ($user, $comment) {
+      $this->createApprovalRecord($user, 'approved', $comment);
+      $this->processNextApprovalStep();
+    });
+  }
 
-        DB::transaction(function () use ($user, $comment) {
-            $this->createApprovalRecord($user, 'approved', $comment);
-            $this->processNextApprovalStep();
-        });
+  /** Reject the request */
+  public function reject($user, $comment = null, $queue = true): void
+  {
+    if ($queue) {
+      ProcessApproval::dispatch($this, $user, 'reject', $comment);
+      return;
     }
 
-    /** Reject the request */
-    public function reject($user, $comment = null, $queue = true)
-    {
-        if ($queue) {
-            return ProcessApproval::dispatch($this, $user, 'reject', $comment);
-        }
+    DB::transaction(function () use ($user, $comment) {
+      $this->createApprovalRecord($user, 'rejected', $comment);
+      $this->setApprovalStatus(ApprovalStatus::REJECTED);
+      event(new ApprovalRejected($this));
+    });
+  }
 
-        DB::transaction(function () use ($user, $comment) {
-            $this->createApprovalRecord($user, 'rejected', $comment);
-            $this->setApprovalStatus(ApprovalStatus::REJECTED);
-            event(new ApprovalRejected($this));
-        });
+  /** Create an approval record */
+  protected function createApprovalRecord($user, string $status, ?string $comment): void
+  {
+    $this->approvals()->create([
+      'user_id' => $user->id,
+      'status' => config("gatekeeper.statuses.$status", $status),
+      'comment' => $comment,
+      'action_at' => now(),
+    ]);
+  }
+
+  /** Process the next approval step */
+  protected function processNextApprovalStep(): void
+  {
+    $nextStep = $this->getNextApplicableStep();
+    if ($nextStep) {
+      $this->current_step = $nextStep->step_order;
+      $this->notifyNextApprovers($nextStep);
+      event(new ApprovalRequested($this));
+    } else {
+      $this->setApprovalStatus(ApprovalStatus::APPROVED);
+      event(new ApprovalApproved($this));
     }
+    $this->save();
+  }
 
-    /** Create an approval record */
-    protected function createApprovalRecord($user, string $status, ?string $comment)
-    {
-        $this->approvals()->create([
-            'user_id' => $user->id,
-            'status' => config("gatekeeper.statuses.$status", $status),
-            'comment' => $comment,
-        ]);
+  /** Get the next applicable approval step */
+  protected function getNextApplicableStep()
+  {
+    return $this->approvalFlow()
+      ->where('step_order', '>', $this->current_step)
+      ->orderBy('step_order')
+      ->get()
+      ->first(fn ($step) => ! $step->condition || $this->evaluateCondition($step->condition));
+  }
+
+  /** Evaluate approval conditions */
+  protected function evaluateCondition($condition): bool
+  {
+    if (is_string($condition)) {
+      $condition = json_decode($condition, true);
     }
-
-    /** Process the next approval step */
-    protected function processNextApprovalStep()
-    {
-        $nextStep = $this->getNextApplicableStep();
-        if ($nextStep) {
-            $this->current_step = $nextStep->step_order;
-            $this->notifyNextApprovers($nextStep);
-            event(new ApprovalRequested($this));
-        } else {
-            $this->setApprovalStatus(ApprovalStatus::APPROVED);
-            event(new ApprovalApproved($this));
-        }
-        $this->save();
+    if (! is_array($condition) || ! isset($condition['field'], $condition['operator'], $condition['value'])) {
+      return true;
     }
+    return match ($condition['operator']) {
+      '<' => $this->{$condition['field']} < $condition['value'],
+      '>' => $this->{$condition['field']} > $condition['value'],
+      '=' => $this->{$condition['field']} == $condition['value'],
+      default => true,
+    };
+  }
 
-    /** Get the next applicable approval step */
-    protected function getNextApplicableStep()
-    {
-        return $this->approvalFlow()
-            ->where('step_order', '>', $this->current_step)
-            ->orderBy('step_order')
-            ->get()
-            ->first(fn ($step) => ! $step->condition || $this->evaluateCondition($step->condition));
+  /** Notify the next approvers */
+  protected function notifyNextApprovers($step): void
+  {
+    $userModel = config('gatekeeper.user_model', \App\Models\User::class);
+    $users = $step->job_title_id
+      ? $userModel::where('job_title_id', $step->job_title_id)->get()
+      : $userModel::role($step->role)->get();
+
+    foreach ($users as $user) {
+      $approveUrl = $this->getApprovalUrl($user);
+      $rejectUrl = $this->getRejectionUrl($user);
+      $user->notify(new ApprovalRequestedNotification($this, $approveUrl, $rejectUrl, $step));
     }
+  }
 
-    /** Evaluate approval conditions */
-    protected function evaluateCondition($condition): bool
-    {
-        if (is_string($condition)) {
-            $condition = json_decode($condition, true);
-        }
+  /** Generate a signed approval URL */
+  public function getApprovalUrl($user, $ttl = 60): string
+  {
+    return $this->generateSignedUrl('gatekeeper.approve', $user, $ttl);
+  }
 
-        if (! is_array($condition) || ! isset($condition['field'], $condition['operator'], $condition['value'])) {
-            return true;
-        }
+  /** Generate a signed rejection URL */
+  public function getRejectionUrl($user, $ttl = 60): string
+  {
+    return $this->generateSignedUrl('gatekeeper.reject', $user, $ttl);
+  }
 
-        return match ($condition['operator']) {
-            '<' => $this->{$condition['field']} < $condition['value'],
-            '>' => $this->{$condition['field']} > $condition['value'],
-            '=' => $this->{$condition['field']} == $condition['value'],
-            default => true,
-        };
-    }
-
-    /** Notify the next approvers */
-    protected function notifyNextApprovers($step)
-    {
-        $userModel = config('gatekeeper.user_model', \App\Models\User::class);
-        $users = $step->job_title_id
-          ? $userModel::where('job_title_id', $step->job_title_id)->get()
-          : $userModel::role($step->role)->get();
-
-        foreach ($users as $user) {
-            $approveUrl = $this->getApprovalUrl($user);
-            $rejectUrl = $this->getRejectionUrl($user);
-            $user->notify(new ApprovalRequestedNotification($this, $approveUrl, $rejectUrl, $step));
-        }
-    }
-
-    /** Generate a signed approval URL */
-    public function getApprovalUrl($user, $ttl = 60): string
-    {
-        return $this->generateSignedUrl('gatekeeper.approve', $user, $ttl);
-    }
-
-    /** Generate a signed rejection URL */
-    public function getRejectionUrl($user, $ttl = 60): string
-    {
-        return $this->generateSignedUrl('gatekeeper.reject', $user, $ttl);
-    }
-
-    /** Generate a signed URL */
-    protected function generateSignedUrl(string $route, $user, int $ttl): string
-    {
-        return URL::temporarySignedRoute($route, now()->addMinutes($ttl), [
-            'approvable_type' => get_class($this),
-            'approvable_id' => $this->id,
-            'user_id' => $user->id,
-        ]);
-    }
+  /** Generate a signed URL */
+  protected function generateSignedUrl(string $route, $user, int $ttl): string
+  {
+    return URL::temporarySignedRoute($route, now()->addMinutes($ttl), [
+      'approvable_type' => get_class($this),
+      'approvable_id' => $this->id,
+      'user_id' => $user->id,
+    ]);
+  }
+  /** Submit the record for approval */
+  public function submitForApproval($user, ?string $comment = null): void
+  {
+    DB::transaction(function () use ($user, $comment) {
+      $this->setApprovalStatus(ApprovalStatus::PENDING);
+      $this->current_step = $this->approvalFlow()->min('step_order') ?? 1;
+      $this->createApprovalRecord($user, 'pending', $comment ?: 'Submitted for approval');
+      $this->processNextApprovalStep();
+    });
+  }
 }
