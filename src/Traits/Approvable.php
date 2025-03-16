@@ -2,9 +2,9 @@
 
 namespace XBigDaddyx\Gatekeeper\Traits;
 
-use XBigDaddyx\Gatekeeper\Enums\ApprovalStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use XBigDaddyx\Gatekeeper\Enums\ApprovalStatus;
 use XBigDaddyx\Gatekeeper\Events\ApprovalApproved;
 use XBigDaddyx\Gatekeeper\Events\ApprovalRejected;
 use XBigDaddyx\Gatekeeper\Events\ApprovalRequested;
