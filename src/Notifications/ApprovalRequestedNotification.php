@@ -34,7 +34,7 @@ class ApprovalRequestedNotification extends Notification
     public function toMail($notifiable)
     {
         $resourceName = class_basename($this->approvable);
-        $stepInfo = $this->step ? "Step {$this->step->step_order}: ".($this->step->job_title_id ? 'Packing Supervisor' : $this->step->role) : 'Final Approval';
+        $stepInfo = $this->step ? "Step {$this->step->step_order}: " . ($this->step->job_title_id ? 'Packing Supervisor' : $this->step->role) : 'Final Approval';
 
         // Compute validated items from CartonBox records
         $validatedItems = $this->approvable->cartonBoxes()
